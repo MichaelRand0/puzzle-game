@@ -9,7 +9,7 @@ interface IState {
 const initialState: IState = {
   rows: 7,
   cols: 14,
-  speed: 200
+  speed: 50
 }
 
 export const settingsSlice = createSlice({

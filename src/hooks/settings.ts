@@ -6,19 +6,18 @@ import { Cell } from "../models/Cell"
 
 export const useSettings = () => {
   const dispatch = useDispatch()
-  const playerSelector = useSelector((state: RootState) => state.settings)
-  const { rows, cols } = playerSelector
+  const settingsSelector = useSelector((state: RootState) => state.settings)
+  const { rows, cols, speed } = settingsSelector
   const actions = bindActionCreators({ ...settingsSlice.actions }, dispatch)
   const { setRows, setCols, setSpeed } = actions
 
-  const cells:Cell[] = []
+  const cells: Cell[] = []
 
-  for(let i = 0; i < rows; i++) {
-    for(let j = 0; j < cols; j++) {
-      cells.push({rowIndex: i, colIndex: j})
+  for (let i = 0; i < rows; i++) {
+    for (let j = 0; j < cols; j++) {
+      cells.push({ rowIndex: i, colIndex: j })
     }
   }
 
-
-  return { rows, cols, setRows, setCols, cells, setSpeed }
+  return { rows, cols, setRows, setCols, cells, speed, setSpeed }
 }

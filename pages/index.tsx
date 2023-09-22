@@ -3,7 +3,7 @@ import Panel from "@/src/components/Panel"
 import { useCanvas } from "@/src/hooks/canvas"
 import { useDimensions } from "@/src/hooks/dimensions"
 import { useSettings } from "@/src/hooks/settings"
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
 export default function Home() {
   const { innerWidth, innerHeight } = useDimensions()
@@ -17,19 +17,23 @@ export default function Home() {
     tableY: innerHeight / 4,
   }
 
-  const { rows, cols, cells } = useSettings()
+  const { rows, cols, cells, speed } = useSettings()
   const { ctx } = useCanvas()
 
   const cellWidth = SIZES.tableWidth / cols
   const cellHeight = SIZES.tableHeight / rows
 
-  const draw = (ctx: CanvasRenderingContext2D) => {
-    if (imgRef.current) {
-      cells.forEach((cell) => {
-        const x = cell.colIndex * cellWidth + SIZES.tableX
-        const y = cell.rowIndex * cellHeight + SIZES.tableY
-        ctx.beginPath()
+  const [isDrawing, setIsDrawing] = useState(false)
 
+  const draw = (ctx: CanvasRenderingContext2D) => {
+    setIsDrawing(true)
+    ctx.clearRect(0, 0, innerWidth, innerHeight)
+    cells.forEach((cell, i) => {
+      const x = cell.colIndex * cellWidth + SIZES.tableX
+      const y = cell.rowIndex * cellHeight + SIZES.tableY
+      ctx.beginPath()
+
+      setTimeout(() => {
         if (imgRef.current) {
           ctx.drawImage(
             imgRef.current,
@@ -42,24 +46,21 @@ export default function Home() {
             cellWidth,
             cellHeight
           )
+          ctx.rect(x, y, cellWidth, cellHeight)
+          ctx.strokeStyle = "black"
+          ctx.stroke()
         }
-
-        ctx.rect(x, y, cellWidth, cellHeight)
-        ctx.stroke()
-      })
-    }
+        if((i + 1) === cells.length) {
+          setIsDrawing(false)
+        }
+      }, speed * (i + 1))
+    })
   }
-
-  useEffect(() => {
-    if (ctx) {
-      draw(ctx)
-    }
-  }, [ctx])
 
   return (
     <main className={`w-screen h-screen`}>
-      <Panel />
-      <Canvas width={innerWidth} height={innerHeight - 202} draw={draw} />
+      <Panel btnProps={{onClick: () => ctx && draw(ctx), disabled: isDrawing}} />
+      <Canvas width={innerWidth} height={innerHeight} draw={draw} />
       <img className="hidden" ref={imgRef} src="/example.jpeg" />
     </main>
   )
