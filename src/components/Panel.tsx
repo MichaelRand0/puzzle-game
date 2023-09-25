@@ -34,13 +34,13 @@ const Panel = (props: Props) => {
   }, [colsValue, rowsValue])
 
   const onRowsChange = (val: number) => {
-    const newVal = Math.floor(val) % 2 === 0 ? Math.floor(val).toString() : (Math.floor(val) + 1).toString()
+    const newVal = Math.floor(val) % 2 === 0 ? Math.floor(val).toString() : (Math.floor(val)).toString()
     setRowsValue(newVal)
     setColsValue((Number(newVal) * 2).toString())
   }
 
   const onColsChange = (val: number) => {
-    const newVal = Math.floor(val) % 2 === 0 ? Math.floor(val).toString() : (Math.floor(val) + 1).toString()
+    const newVal = Math.floor(val) % 2 === 0 ? Math.floor(val).toString() : (Math.floor(val)).toString()
     setColsValue(newVal)
     setRowsValue((Number(newVal) / 2).toString())
   }

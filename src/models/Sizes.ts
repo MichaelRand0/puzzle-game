@@ -6,4 +6,6 @@ export type Sizes = {
   tableHeight: number
   tableX: number
   tableY: number
+  windowWidth: number
+  windowHeight: number
 }

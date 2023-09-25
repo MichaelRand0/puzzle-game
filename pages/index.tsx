@@ -3,7 +3,16 @@ import Panel from "@/src/components/Panel"
 import { useCanvas } from "@/src/hooks/canvas"
 import { useDimensions } from "@/src/hooks/dimensions"
 import { useSettings } from "@/src/hooks/settings"
+import { Cell } from "@/src/models/Cell"
+import checkIsClose from "@/src/utils/checkIsClose"
 import { useEffect, useRef, useState } from "react"
+
+type SelectedCell = {
+  offset: {
+    x: number
+    y: number
+  }
+} & Cell
 
 export default function Home() {
   const { SIZES, cellWidth, cellHeight } = useDimensions()
@@ -12,6 +21,7 @@ export default function Home() {
 
   const { rows, cols, speed } = useSettings()
   const { ctx, cells, setCells, initializeCells } = useCanvas()
+  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null)
 
   const [isDrawing, setIsDrawing] = useState(false)
 
@@ -30,6 +40,36 @@ export default function Home() {
       }
     })
     setCells(newCells)
+    return newCells
+  }
+
+  const updateDraw = (newCells: Cell[] = cells) => {
+    // console.log("UPDATEEE!")
+    if (ctx && SIZES) {
+      ctx.clearRect(0, 0, SIZES.innerWidth, SIZES.innerHeight)
+    }
+    newCells.forEach((cell, i) => {
+      if (ctx) {
+        ctx.beginPath()
+
+        if (imgRef.current) {
+          ctx.drawImage(
+            imgRef.current,
+            (cell.colIndex * imgRef.current.width) / cols,
+            (cell.rowIndex * imgRef.current.height) / rows,
+            imgRef.current.width / cols,
+            imgRef.current.height / rows,
+            cell.x,
+            cell.y,
+            cellWidth,
+            cellHeight
+          )
+          ctx.rect(cell.x, cell.y, cellWidth, cellHeight)
+          ctx.strokeStyle = "black"
+          ctx.stroke()
+        }
+      }
+    })
   }
 
   const autoDraw = () => {
@@ -115,12 +155,117 @@ export default function Home() {
     }
   }
 
+  const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    // get cell by click on it
+    const x = e.clientX
+    const y = e.clientY
+    const newCells = cells.filter((cell) => {
+      if (
+        x > cell.x &&
+        x < cell.x + cellWidth &&
+        y > cell.y &&
+        y < cell.y + cellHeight
+      ) {
+        return false
+      } else {
+        return true
+      }
+    })
+
+    console.log("newCells2", newCells)
+
+    const newSelectedCell = cells
+      .map((cell) => {
+        if (ctx && SIZES) {
+          if (
+            x > cell.x &&
+            x < cell.x + cellWidth &&
+            y > cell.y &&
+            y < cell.y + cellHeight
+          ) {
+            return {
+              ...cell,
+              offset: {
+                x: x - cell.x,
+                y: y - cell.y,
+              },
+            }
+          } else {
+            return null
+          }
+        }
+      })
+      .filter((cell) => cell)[0]
+    // console.log("newSelectedCell", newSelectedCell)
+    if (newSelectedCell) {
+      setSelectedCell({ ...newSelectedCell })
+      newCells.push(newSelectedCell)
+      setCells(newCells)
+    }
+  }
+
+  // useEffect(() => {updateDraw()}, [cells])
+
+  const onMouseMove = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const x = e.clientX
+    const y = e.clientY
+    if (selectedCell && SIZES) {
+      const newCells = cells.map((cell) => {
+        if (
+          cell.colIndex === selectedCell.colIndex &&
+          cell.rowIndex === selectedCell.rowIndex
+        ) {
+          return {
+            ...cell,
+            x: x - selectedCell.offset.x,
+            y: y - selectedCell.offset.y,
+          }
+        } else {
+          return cell
+        }
+      })
+      setSelectedCell({
+        ...selectedCell,
+        x: x - selectedCell.offset.x,
+        y: y - selectedCell.offset.y,
+      })
+      setCells(newCells)
+      updateDraw(newCells)
+    }
+  }
+
+  const onMouseUp = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
+    const x = e.clientX
+    const y = e.clientY
+    if (selectedCell) {
+      const isClose = checkIsClose(
+        { x: selectedCell?.x, y: selectedCell?.y },
+        { x: selectedCell?.initX, y: selectedCell?.initY },
+        cellWidth
+      )
+      const newCells = cells.map((cell) => {
+        if (
+          cell.rowIndex === selectedCell.rowIndex &&
+          cell.colIndex === selectedCell.colIndex
+        ) {
+          return {
+            ...selectedCell,
+            x: isClose ? selectedCell.initX : x - selectedCell.offset.x,
+            y: isClose ? selectedCell.initY : y - selectedCell.offset.y,
+          }
+        } else {
+          return cell
+        }
+      })
+      setCells(newCells)
+      setSelectedCell(null)
+      updateDraw(newCells)
+    }
+  }
+
   return (
-    <main
-      onMouseDown={() => console.log("down")}
-      className={`w-screen h-screen`}
-    >
-      <Panel disabled={rows <= 0 || cols <= 0 || isDrawing}>
+    <main className={`w-screen h-screen`}>
+      <Panel disabled={isDrawing}>
         <button
           onClick={() => autoDraw()}
           disabled={rows <= 0 || cols <= 0 || isDrawing}
@@ -136,7 +281,9 @@ export default function Home() {
           Randomize cells
         </button>
         <button
-          onClick={() => resetDraw()}
+          onClick={() => {
+            updateDraw(resetDraw())
+          }}
           disabled={rows <= 0 || cols <= 0 || isDrawing}
           className="bg-slate-600 text-white p-2 rounded mb-2 hover:bg-slate-400 hover:text-black transition disabled:hover:bg-slate-600 disabled:hover:text-white disabled:opacity-50"
         >
@@ -144,6 +291,9 @@ export default function Home() {
         </button>
       </Panel>
       <Canvas
+        onMouseDown={(e) => onMouseDown(e)}
+        onMouseMove={(e) => onMouseMove(e)}
+        onMouseUp={(e) => onMouseUp(e)}
         width={SIZES ? SIZES.innerWidth : 0}
         height={SIZES ? SIZES.innerHeight : 0}
       />

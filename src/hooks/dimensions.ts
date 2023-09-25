@@ -25,6 +25,8 @@ export const useDimensions = () => {
         tableHeight: window.innerHeight * 0.7,
         tableX: window.innerWidth * 0.15,
         tableY: window.innerHeight * 0.2,
+        windowWidth: window.outerWidth,
+        windowHeight: window.outerHeight
       }
       setSizes(newSizes)
     }
