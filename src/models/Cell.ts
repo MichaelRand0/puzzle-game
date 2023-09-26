@@ -6,6 +6,10 @@ export type Cell = {
   initX: number
   initY: number
   isCorrect: boolean
+  leftTab: number
+  topTab: number
+  rightTab: number
+  bottomTab: number
 }
 
 export type SelectedCell = {

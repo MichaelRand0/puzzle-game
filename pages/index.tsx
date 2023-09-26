@@ -38,6 +38,10 @@ export default function Home() {
     }
   }, [cellWidth])
 
+  // useEffect(() => {
+  //   console.log('cells', cells)
+  // }, [cells])
+
   return (
     <main className={`w-screen h-screen`}>
       <Panel imgRef={imgRef} disabled={isDrawing}>
