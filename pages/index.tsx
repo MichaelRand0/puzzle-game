@@ -159,52 +159,35 @@ export default function Home() {
     // get cell by click on it
     const x = e.clientX
     const y = e.clientY
-    const newCells = cells.filter((cell) => {
+    let copyCells = [...cells]
+    const cellToRemove = [...copyCells].reverse().filter((cell) => {
       if (
         x > cell.x &&
         x < cell.x + cellWidth &&
         y > cell.y &&
         y < cell.y + cellHeight
       ) {
-        return false
-      } else {
         return true
       }
-    })
+    })[0]
 
-    console.log("newCells2", newCells)
+    const index = copyCells.indexOf(cellToRemove)
+    copyCells.splice(index, 1)
+    copyCells.push(cellToRemove)
 
-    const newSelectedCell = cells
-      .map((cell) => {
-        if (ctx && SIZES) {
-          if (
-            x > cell.x &&
-            x < cell.x + cellWidth &&
-            y > cell.y &&
-            y < cell.y + cellHeight
-          ) {
-            return {
-              ...cell,
-              offset: {
-                x: x - cell.x,
-                y: y - cell.y,
-              },
-            }
-          } else {
-            return null
-          }
+    if (cellToRemove) {
+      const newSelectedCell = {
+        ...cellToRemove,
+        offset: {
+          x: x - cellToRemove.x,
+          y: y - cellToRemove.y
         }
-      })
-      .filter((cell) => cell)[0]
-    // console.log("newSelectedCell", newSelectedCell)
-    if (newSelectedCell) {
+      }
       setSelectedCell({ ...newSelectedCell })
-      newCells.push(newSelectedCell)
-      setCells(newCells)
+      setCells(copyCells)
+      updateDraw(copyCells)
     }
   }
-
-  // useEffect(() => {updateDraw()}, [cells])
 
   const onMouseMove = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     const x = e.clientX
