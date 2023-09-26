@@ -4,6 +4,8 @@ import { bindActionCreators } from "@reduxjs/toolkit"
 import { canvasSlice } from "../redux/features/canvasSlice"
 import { useSettings } from "./settings"
 import { useDimensions } from "./dimensions"
+import { useState } from "react"
+import { SelectedCell } from "../models/Cell"
 
 export const useCanvas = () => {
   const dispatch = useDispatch()
@@ -12,6 +14,7 @@ export const useCanvas = () => {
   const actions = bindActionCreators({ ...canvasSlice.actions }, dispatch)
   const { setCtx, setCells } = actions
   const { rows, cols } = useSettings()
+  const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null)
   const { SIZES, cellWidth, cellHeight } = useDimensions()
 
   const initializeCells = () => {
@@ -29,6 +32,7 @@ export const useCanvas = () => {
             y,
             initX: x,
             initY: y,
+            isCorrect: false,
           })
         }
       }
@@ -36,5 +40,13 @@ export const useCanvas = () => {
     }
   }
 
-  return { ctx, setCtx, cells, setCells, initializeCells }
+  return {
+    ctx,
+    setCtx,
+    cells,
+    setCells,
+    initializeCells,
+    selectedCell,
+    setSelectedCell,
+  }
 }

@@ -1,11 +1,13 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { settingsSlice } from './features/settingsSlice'
 import { canvasSlice } from './features/canvasSlice'
+import { gameSlice } from './features/gameSlice'
 
 export const store = configureStore({
   reducer: {
     settings: settingsSlice.reducer,
     canvas: canvasSlice.reducer,
+    game: gameSlice.reducer
   },
 })
 

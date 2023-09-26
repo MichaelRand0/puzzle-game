@@ -5,4 +5,12 @@ export type Cell = {
   y: number
   initX: number
   initY: number
+  isCorrect: boolean
 }
+
+export type SelectedCell = {
+  offset: {
+    x: number
+    y: number
+  }
+} & Cell
