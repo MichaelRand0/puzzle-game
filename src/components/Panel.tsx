@@ -1,7 +1,7 @@
 import { RefObject, useEffect, useState } from "react"
 import { useSettings } from "../hooks/settings"
 import convertMsToTime from "../utils/msToTime"
-import useDraw from "../hooks/draw"
+import { Direction } from "../models/Settings"
 
 interface Props extends React.ComponentProps<"div"> {
   disabled?: boolean
@@ -10,8 +10,8 @@ interface Props extends React.ComponentProps<"div"> {
 
 const Panel = (props: Props) => {
   const { children, disabled = false, imgRef } = props
-  const { setCols, setRows, setSpeed, cols, rows, speed } = useSettings()
-  const { isGame } = useDraw(imgRef)
+  const { setCols, setRows, setSpeed, setDirection, cols, rows, speed } =
+    useSettings()
 
   const [totalTime, setTotalTime] = useState("")
 
@@ -19,10 +19,10 @@ const Panel = (props: Props) => {
     setTotalTime(convertMsToTime(cols * rows * speed))
   }, [cols, rows, speed])
 
-  const [rowsValue, setRowsValue] = useState("5")
-  const [colsValue, setColsValue] = useState("8")
+  const [rowsValue, setRowsValue] = useState(rows.toString())
+  const [colsValue, setColsValue] = useState(cols.toString())
 
-  const [timer, setTimer] = useState()
+  const [directionValue, setDirectionValue] = useState<Direction>("topLeft")
 
   const validateNumber = (val: number, max: number) => {
     const numberVal = Number(val)
@@ -36,7 +36,8 @@ const Panel = (props: Props) => {
   useEffect(() => {
     setCols(Number(colsValue))
     setRows(Number(rowsValue))
-  }, [colsValue, rowsValue])
+    setDirection(directionValue)
+  }, [colsValue, rowsValue, directionValue])
 
   const onRowsChange = (val: number) => {
     const newVal =
@@ -57,70 +58,76 @@ const Panel = (props: Props) => {
   }
 
   return (
-    <header className="fixed w-full left-10 top-5 flex items-center">
-      <div className="mr-10 w-[340px]">
-        {children}
-        {isGame ? (
-          ""
-        ) : (
-          <div>
-            Время авто. сборки:{" "}
-            <span className="text-lime-600 font-medium">{totalTime}</span>
-          </div>
-        )}
+    <header className="fixed w-full left-10 top-5 flex">
+      <div className="mr-10 flex flex-col">
         <div>
-          Количество паззлов:{" "}
-          <span className="text-lime-600 font-medium">{rows * cols}</span>
+          <div className="text-black">
+            Время авто. сборки:{" "}
+            <span className="text-red-600 font-bold">{totalTime}</span>
+          </div>
+
+          <div className="text-black">
+            Количество паззлов:{" "}
+            <span className="text-red-600 font-bold">{rows * cols}</span>
+          </div>
+        </div>
+        {children}
+      </div>
+      <div className="flex">
+        <div className="flex flex-col mr-10">
+          <span className="mb-1">Количество строк</span>
+          <input
+            disabled={disabled}
+            max={100}
+            onChange={(val) =>
+              onRowsChange(validateNumber(Number(val.currentTarget.value), 100))
+            }
+            value={rowsValue}
+            type="number"
+            className="text-[black] text-lg p-2 text-lime-600 font-medium"
+            placeholder={rows.toString()}
+          />
+        </div>
+        <div className="flex flex-col mr-10">
+          <span className="mb-1">Количество колоннок</span>
+          <input
+            disabled={disabled}
+            onChange={(val) =>
+              onColsChange(validateNumber(Number(val.currentTarget.value), 100))
+            }
+            type="number"
+            value={colsValue}
+            className="text-[black] text-lg p-2 text-lime-600 font-medium"
+            placeholder={cols.toString()}
+          />
+        </div>
+        <div className="flex flex-col mr-10">
+          <span className="mb-1">Скорость сборки одного паззла(в мс)</span>
+          <input
+            disabled={disabled}
+            onChange={(val) => setSpeed(Number(val.currentTarget.value))}
+            type="number"
+            defaultValue={speed}
+            className="text-[black] text-lg p-2 text-lime-600 font-medium"
+            placeholder={speed.toString()}
+          />
+        </div>
+        <div className="flex flex-col mr-10">
+          <span className="mb-1">Направление авто. сборки</span>
+          <select
+            onChange={(e: any) => setDirectionValue(e.target.value)}
+            value={directionValue}
+            className="text-black"
+          >
+            <option value="topLeft">С верхнего левого края</option>
+            {/* <option value="topRight">С верхнего правого края</option> */}
+            {/* <option value="center">С центра</option> */}
+            <option value="random">Случайно</option>
+            {/* <option value="bottomLeft">С нижнего левого края</option> */}
+            {/* <option value="bottomRight">С нижнего правого края</option> */}
+          </select>
         </div>
       </div>
-      {isGame ? (
-        ""
-      ) : (
-        <div className="flex">
-          <div className="flex flex-col mr-10">
-            <span className="mb-1">Количество строк</span>
-            <input
-              disabled={disabled}
-              max={100}
-              onChange={(val) =>
-                onRowsChange(
-                  validateNumber(Number(val.currentTarget.value), 100)
-                )
-              }
-              value={rowsValue}
-              type="number"
-              className="text-[black] text-lg p-2 text-lime-600 font-medium"
-              placeholder={rows.toString()}
-            />
-          </div>
-          <div className="flex flex-col mr-10">
-            <span className="mb-1">Количество колоннок</span>
-            <input
-              disabled={disabled}
-              onChange={(val) =>
-                onColsChange(
-                  validateNumber(Number(val.currentTarget.value), 100)
-                )
-              }
-              type="number"
-              value={colsValue}
-              className="text-[black] text-lg p-2 text-lime-600 font-medium"
-              placeholder={cols.toString()}
-            />
-          </div>
-          <div className="flex flex-col mr-10">
-            <span className="mb-1">Скорость сборки одного паззла(в мс)</span>
-            <input
-              disabled={disabled}
-              onChange={(val) => setSpeed(Number(val.currentTarget.value))}
-              type="number"
-              defaultValue={speed}
-              className="text-[black] text-lg p-2 text-lime-600 font-medium"
-              placeholder={speed.toString()}
-            />
-          </div>
-        </div>
-      )}
     </header>
   )
 }

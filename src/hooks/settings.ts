@@ -6,9 +6,9 @@ import { settingsSlice } from "../redux/features/settingsSlice"
 export const useSettings = () => {
   const dispatch = useDispatch()
   const settingsSelector = useSelector((state: RootState) => state.settings)
-  const { rows, cols, speed } = settingsSelector
+  const { rows, cols, speed, direction } = settingsSelector
   const actions = bindActionCreators({ ...settingsSlice.actions }, dispatch)
-  const { setRows, setCols, setSpeed } = actions
+  const { setRows, setCols, setSpeed, setDirection } = actions
 
-  return { rows, cols, setRows, setCols, speed, setSpeed }
+  return { rows, cols, setRows, setCols, speed, setSpeed, direction, setDirection }
 }

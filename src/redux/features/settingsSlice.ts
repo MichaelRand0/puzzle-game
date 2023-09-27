@@ -1,16 +1,18 @@
-import { Cell } from "@/src/models/Cell"
+import { Direction } from "@/src/models/Settings"
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 
 interface IState {
   rows: number
   cols: number
   speed: number
+  direction: Direction
 }
 
 const initialState: IState = {
   rows: 5,
-  cols: 8,
+  cols: 10,
   speed: 50,
+  direction: "topLeft",
 }
 
 export const settingsSlice = createSlice({
@@ -25,6 +27,9 @@ export const settingsSlice = createSlice({
     },
     setSpeed(state, action: PayloadAction<number>) {
       state.speed = action.payload
+    },
+    setDirection(state, action: PayloadAction<Direction>) {
+      state.direction = action.payload
     },
   },
 })
