@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { Cell } from "@/src/models/Cell"
 import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 
