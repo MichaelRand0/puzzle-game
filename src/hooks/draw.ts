@@ -50,16 +50,16 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
     }
     newCells.forEach((cell, i) => {
       if (ctx) {
-        ctx.beginPath()
-        ctx.globalAlpha = 1
         if (imgRef.current) {
+          ctx.beginPath()
+          ctx.globalAlpha = 1
           // drawing tabs
 
           // tab sizes
           const sz = Math.min(cellWidth, cellHeight)
-          const neck = 0.1 * sz
-          const tabWidth = 0.2 * sz
-          const tabHeight = 0.2 * sz
+          const neck = 0.08 * sz
+          const tabWidth = 0.16 * sz
+          const tabHeight = 0.16 * sz
 
           // from top left
           ctx.moveTo(cell.x, cell.y)
@@ -175,9 +175,6 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
           }
           ctx.lineTo(cell.x, cell.y)
 
-          ctx.save()
-          ctx.clip()
-
           const scaledTabHeight =
             (Math.min(
               imgRef.current.width / cols,
@@ -185,6 +182,9 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
             ) *
               tabHeight) /
             sz
+
+          ctx.save()
+          ctx.clip()
 
           ctx.drawImage(
             imgRef.current,
@@ -258,27 +258,27 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
         }
       })
       setCells(newCells)
-      newCells.forEach((cell) => {
-        ctx.beginPath()
-        ctx.globalAlpha = 1
+      // newCells.forEach((cell) => {
+      //   ctx.beginPath()
+      //   ctx.globalAlpha = 1
 
-        if (imgRef.current) {
-          ctx.drawImage(
-            imgRef.current,
-            (cell.colIndex * imgRef.current.width) / cols,
-            (cell.rowIndex * imgRef.current.height) / rows,
-            imgRef.current.width / cols,
-            imgRef.current.height / rows,
-            cell.x,
-            cell.y,
-            cellWidth,
-            cellHeight
-          )
-          ctx.rect(cell.x, cell.y, cellWidth, cellHeight)
-          ctx.strokeStyle = "black"
-          ctx.stroke()
-        }
-      })
+      //   if (imgRef.current) {
+      //     ctx.drawImage(
+      //       imgRef.current,
+      //       (cell.colIndex * imgRef.current.width) / cols,
+      //       (cell.rowIndex * imgRef.current.height) / rows,
+      //       imgRef.current.width / cols,
+      //       imgRef.current.height / rows,
+      //       cell.x,
+      //       cell.y,
+      //       cellWidth,
+      //       cellHeight
+      //     )
+      //     ctx.rect(cell.x, cell.y, cellWidth, cellHeight)
+      //     ctx.strokeStyle = "black"
+      //     ctx.stroke()
+      //   }
+      // })
       updateDraw(newCells)
     }
   }
