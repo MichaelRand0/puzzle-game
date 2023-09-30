@@ -235,7 +235,7 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
 
       switch (direction) {
         case "center":
-          const sortedCells = sortByCentralCoordinates(newCells)
+          const sortedCells = sortByCentralCoordinates([...newCells])
           console.log("sortedCells", sortedCells)
 
           sortedCells.forEach((sortedCell, i) => {
