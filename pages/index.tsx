@@ -5,6 +5,7 @@ import { useDimensions } from "@/src/hooks/dimensions"
 import useDragging from "@/src/hooks/dragging"
 import useDraw from "@/src/hooks/draw"
 import { useSettings } from "@/src/hooks/settings"
+import shuffleArray from "@/src/utils/shuffleArray"
 import { useEffect, useRef } from "react"
 
 export default function Home() {
@@ -13,7 +14,7 @@ export default function Home() {
   const imgRef = useRef<HTMLImageElement>(null)
 
   const { rows, cols } = useSettings()
-  const { initializeCells, cells } = useCanvas()
+  const { initializeCells, cells, setCells } = useCanvas()
 
   const { onMouseDown, onMouseMove, onMouseUp } = useDragging(imgRef)
   const { autoDraw, updateDraw, resetDraw, randomDraw, isDrawing } =
@@ -37,7 +38,9 @@ export default function Home() {
         </button>
         <button
           onClick={() => {
-            updateDraw(randomDraw())
+            const result = shuffleArray(randomDraw())
+            updateDraw(result)
+            setCells(result)
           }}
           disabled={rows <= 0 || cols <= 0 || isDrawing}
           className="bg-slate-600 text-white p-2 rounded mb-2 hover:bg-slate-400 hover:text-black transition disabled:hover:bg-slate-600 disabled:hover:text-white disabled:opacity-50"

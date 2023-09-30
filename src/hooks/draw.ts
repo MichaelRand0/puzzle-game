@@ -202,31 +202,121 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
     })
   }
 
+  const pushCells = (newCells: Cell[], i: number) => {
+    const fixedRandomisedCells = newCells.map((randomCell) => {
+      if (
+        randomCell.colIndex === newCells[i].colIndex &&
+        randomCell.rowIndex === newCells[i].rowIndex
+      ) {
+        return {
+          ...randomCell,
+          x: randomCell.initX,
+          y: randomCell.initY,
+        }
+      } else {
+        return randomCell
+      }
+    })
+    newCells = fixedRandomisedCells
+    setCells(newCells)
+    updateDraw(newCells)
+    return newCells
+  }
+
   const autoDraw = () => {
-    const randomisedCells = direction === 'random' ? shuffleArray(randomDraw()) : randomDraw()
+    const randomisedCells =
+      direction === "random" ? shuffleArray(randomDraw()) : randomDraw()
     if (SIZES && ctx && imgRef.current) {
-      let newCells = randomisedCells
-      randomisedCells.forEach((cell, i) => {
-        setTimeout(() => {
-          const fixedRandomisedCells = newCells.map((randomCell) => {
-            if (
-              randomCell.colIndex === cell.colIndex &&
-              randomCell.rowIndex === cell.rowIndex
-            ) {
-              return {
-                ...randomCell,
-                x: randomCell.initX,
-                y: randomCell.initY,
-              }
-            } else {
-              return randomCell
+      let newCells =
+        direction === "bottomRight"
+          ? randomisedCells.reverse()
+          : randomisedCells
+
+      switch (direction) {
+        case "leftRight":
+          for (let i = 0; i <= newCells.length / 2; i++) {
+            setTimeout(() => {
+              newCells = pushCells(newCells, i)
+            }, (i === 0 ? 1 : speed) * (i + 1))
+          }
+          let count = 0
+          for (let i = newCells.length - 1; i > newCells.length / 2; i--) {
+            let time = (count === 0 ? 1 : speed) * (count + 1)
+            setTimeout(() => {
+              newCells = pushCells(newCells, i)
+            }, time)
+            count++
+          }
+          break
+
+        case "topLeft":
+          for (let i = 0; i < newCells.length; i++) {
+            setTimeout(() => {
+              newCells = pushCells(newCells, i)
+            }, (i === 0 ? 1 : speed) * (i + 1))
+          }
+          break
+
+        case "random":
+          for (let i = 0; i < newCells.length; i++) {
+            setTimeout(() => {
+              newCells = pushCells(newCells, i)
+            }, (i === 0 ? 1 : speed) * (i + 1))
+          }
+          break
+
+        case "bottomRight":
+          for (let i = 0; i < newCells.length; i++) {
+            setTimeout(() => {
+              newCells = pushCells(newCells, i)
+            }, (i === 0 ? 1 : speed) * (i + 1))
+          }
+          break
+
+        case "topBottom":
+          const cellsLength = rows * cols
+          let colIndex = 0
+          for (
+            let i = 0;
+            i <= cellsLength;
+            i = i + cols >= cellsLength ? colIndex : i + cols
+          ) {
+            if (i === cellsLength || i * cols === cellsLength) {
+              break
             }
-          })
-          newCells = fixedRandomisedCells
-          setCells(newCells)
-          updateDraw(newCells)
-        }, (i === 0 ? 1 : speed) * (i + 1))
-      })
+            let time = (rows * colIndex + cells[i].rowIndex) * speed
+            setTimeout(() => {
+              newCells = pushCells(newCells, i)
+            }, time)
+            if (i + cols >= cellsLength) {
+              colIndex = colIndex + 1
+            }
+          }
+
+          let colIndex2 = 1
+
+          for (
+            let i = cellsLength - 1;
+            i >= 0;
+            i = i - cols < 0 ? cellsLength - colIndex2 : i - cols
+          ) {
+            let time = (rows * colIndex2 - cells[i].rowIndex) * speed
+            setTimeout(() => {
+              newCells = pushCells(newCells, i)
+            }, time - speed)
+            if (i - cols < 0) {
+              colIndex2 = colIndex2 + 1
+            }
+            if (i === 0 || i * cols === cellsLength) {
+              break
+            }
+          }
+
+          break
+
+        default:
+          break
+      }
     }
   }
 
@@ -238,9 +328,11 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
 
       const newCells = resettedCells.map((cell) => {
         const randomX =
-          Math.random() * (SIZES.tableWidth / 4 - cellWidth) + SIZES.tableX * 5.4
+          Math.random() * (SIZES.tableWidth / 4 - cellWidth) +
+          SIZES.tableX * 5.4
         const randomY =
-          Math.random() * (SIZES.tableHeight / 2 - cellHeight) + SIZES.tableY * 2
+          Math.random() * (SIZES.tableHeight / 2 - cellHeight) +
+          SIZES.tableY * 2
 
         return {
           ...cell,
@@ -249,8 +341,7 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
           isCorrect: false,
         }
       })
-      setCells(newCells)
-      // updateDraw(newCells)
+
       return newCells
     }
     return cells

@@ -10,7 +10,7 @@ interface Props extends React.ComponentProps<"div"> {
 
 const Panel = (props: Props) => {
   const { children, disabled = false, imgRef } = props
-  const { setCols, setRows, setSpeed, setDirection, cols, rows, speed } =
+  const { setCols, setRows, setSpeed, direction, setDirection, cols, rows, speed } =
     useSettings()
 
   const [totalTime, setTotalTime] = useState("")
@@ -22,7 +22,7 @@ const Panel = (props: Props) => {
   const [rowsValue, setRowsValue] = useState(rows.toString())
   const [colsValue, setColsValue] = useState(cols.toString())
 
-  const [directionValue, setDirectionValue] = useState<Direction>("topLeft")
+  const [directionValue, setDirectionValue] = useState<Direction>(direction)
 
   const validateNumber = (val: number, max: number) => {
     const numberVal = Number(val)
@@ -84,7 +84,7 @@ const Panel = (props: Props) => {
             }
             value={rowsValue}
             type="number"
-            className="text-[black] text-lg p-2 text-lime-600 font-medium"
+            className=" text-lg p-2 text-lime-600 font-medium"
             placeholder={rows.toString()}
           />
         </div>
@@ -97,7 +97,7 @@ const Panel = (props: Props) => {
             }
             type="number"
             value={colsValue}
-            className="text-[black] text-lg p-2 text-lime-600 font-medium"
+            className=" text-lg p-2 text-lime-600 font-medium"
             placeholder={cols.toString()}
           />
         </div>
@@ -108,7 +108,7 @@ const Panel = (props: Props) => {
             onChange={(val) => setSpeed(Number(val.currentTarget.value))}
             type="number"
             defaultValue={speed}
-            className="text-[black] text-lg p-2 text-lime-600 font-medium"
+            className=" text-lg p-2 text-lime-600 font-medium"
             placeholder={speed.toString()}
           />
         </div>
@@ -120,11 +120,11 @@ const Panel = (props: Props) => {
             className="text-black"
           >
             <option value="topLeft">С верхнего левого края</option>
-            {/* <option value="topRight">С верхнего правого края</option> */}
+            <option value="topBottom">Сверху и снизу</option>
             {/* <option value="center">С центра</option> */}
             <option value="random">Случайно</option>
-            {/* <option value="bottomLeft">С нижнего левого края</option> */}
-            {/* <option value="bottomRight">С нижнего правого края</option> */}
+            <option value="leftRight">Слева и справа</option>
+            <option value="bottomRight">С нижнего правого края</option>
           </select>
         </div>
       </div>
