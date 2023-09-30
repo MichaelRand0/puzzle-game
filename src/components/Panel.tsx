@@ -121,7 +121,7 @@ const Panel = (props: Props) => {
           >
             <option value="topLeft">С верхнего левого края</option>
             <option value="topBottom">Сверху и снизу</option>
-            {/* <option value="center">С центра</option> */}
+            <option value="center">С центра</option>
             <option value="random">Случайно</option>
             <option value="leftRight">Слева и справа</option>
             <option value="bottomRight">С нижнего правого края</option>

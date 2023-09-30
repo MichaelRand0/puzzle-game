@@ -5,6 +5,7 @@ import { useDimensions } from "./dimensions"
 import { useSettings } from "./settings"
 import useGame from "./game"
 import shuffleArray from "../utils/shuffleArray"
+import sortByCentralCoordinates from "../utils/sortByCentralCoords"
 
 const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
   const { cells, setCells, ctx } = useCanvas()
@@ -233,6 +234,18 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
           : randomisedCells
 
       switch (direction) {
+        case "center":
+          const sortedCells = sortByCentralCoordinates(newCells)
+          console.log("sortedCells", sortedCells)
+
+          sortedCells.forEach((sortedCell, i) => {
+            const index = newCells.indexOf(sortedCell)
+            setTimeout(() => {
+              newCells = pushCells(newCells, index)
+            }, i * speed)
+          })
+
+          break
         case "leftRight":
           for (let i = 0; i <= newCells.length / 2; i++) {
             setTimeout(() => {
