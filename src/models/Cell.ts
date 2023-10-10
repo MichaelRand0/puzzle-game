@@ -18,3 +18,7 @@ export type SelectedCell = {
     y: number
   }
 } & Cell
+
+export type AnimatedCell = {
+  id: number
+} & Cell

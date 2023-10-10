@@ -12,7 +12,7 @@ const initialState: IState = {
   rows: 5,
   cols: 10,
   speed: 50,
-  direction: "center",
+  direction: "topLeft",
 }
 
 export const settingsSlice = createSlice({

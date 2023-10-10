@@ -5,11 +5,10 @@ import { useDimensions } from "./dimensions"
 import useDraw from "./draw"
 
 const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
+  const { cells, setCells, selectedCell, setSelectedCell } = useCanvas()
+  const { SIZES, cellHeight, cellWidth } = useDimensions()
 
-  const {cells, setCells, selectedCell, setSelectedCell} = useCanvas()
-  const {SIZES, cellHeight, cellWidth} = useDimensions()
-
-  const {updateDraw} = useDraw(imgRef)
+  const { drawCells } = useDraw(imgRef)
 
   const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     // get cell by click on it
@@ -21,8 +20,8 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
         x > cell.x &&
         x < cell.x + cellWidth &&
         y > cell.y &&
-        y < cell.y + cellHeight
-        && !cell.isCorrect
+        y < cell.y + cellHeight &&
+        !cell.isCorrect
       ) {
         return true
       }
@@ -42,7 +41,7 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
       }
       setSelectedCell({ ...newSelectedCell })
       setCells(copyCells)
-      updateDraw(copyCells)
+      // drawCells(copyCells)
     }
   }
 
@@ -70,7 +69,7 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
         y: y - selectedCell.offset.y,
       })
       setCells(newCells)
-      updateDraw(newCells)
+      drawCells(newCells)
     }
   }
 
@@ -92,7 +91,7 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
             ...selectedCell,
             x: isClose ? selectedCell.initX : x - selectedCell.offset.x,
             y: isClose ? selectedCell.initY : y - selectedCell.offset.y,
-            isCorrect: isClose
+            isCorrect: isClose,
           }
         } else {
           return cell
@@ -100,14 +99,14 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
       })
       setCells(newCells)
       setSelectedCell(null)
-      updateDraw(newCells)
+      drawCells(newCells)
     }
   }
 
   return {
     onMouseDown,
     onMouseMove,
-    onMouseUp
+    onMouseUp,
   }
 }
 
