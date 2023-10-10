@@ -41,7 +41,7 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
       }
       setSelectedCell({ ...newSelectedCell })
       setCells(copyCells)
-      // drawCells(copyCells)
+      drawCells(copyCells)
     }
   }
 

@@ -186,15 +186,17 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
   let drawOnlyPrevs = false
 
   const animate = (cell: Cell, list: Cell[]) => {
-    console.log("animate")
+    // console.log("animate")
     if (coords[coordIndex]) {
       const newCell = {
         ...cell,
         x: coords[coordIndex] ? coords[coordIndex].x : cell.x,
         y: coords[coordIndex] ? coords[coordIndex].y : cell.y,
       }
+      
+      // console.log('list', list)
 
-      draw(newCell)
+      draw(newCell, list, true)
       coordIndex++
       if (coords[coordIndex]) {
         requestAnimationFrame(() => animate(cell, list))
@@ -225,7 +227,7 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
     }
   }
 
-  const draw = (cell: Cell) => {
+  const draw = (cell: Cell, list: Cell[] = cells, isAutoDraw = false) => {
     if (ctx && SIZES && imgRef.current) {
       ctx.clearRect(0, 0, SIZES.innerWidth, SIZES.innerHeight)
       ctx.globalAlpha = 0.2
@@ -237,17 +239,22 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
         SIZES.tableHeight
       )
     }
-    cells.forEach((item, i) => {
-      const cellFromCells = cells.filter(
+    // console.log('list', list)
+    list.forEach((item, i) => {
+      const cellFromCells = list.filter(
         (item2) =>
           item2.rowIndex === cell.rowIndex && item2.colIndex === cell.colIndex
       )[0]
-      const indexOf = cells.indexOf(cellFromCells)
+      const indexOf = list.indexOf(cellFromCells)
       if (item.rowIndex === cell.rowIndex && item.colIndex === cell.colIndex) {
         drawCanvas(cell, cell.x, cell.y)
       } else {
-        if (i < indexOf) {
+        // console.log('isDrawing', isDrawing)
+        if (i < indexOf && isAutoDraw) {
           // todo = при dragging отрисовываются только предыдущие клетки, нужно исправить
+          // console.log('item', item)
+          drawCanvas(item, item.initX, item.initY)
+        } else {
           drawCanvas(item, item.x, item.y)
         }
       }
@@ -257,7 +264,7 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
   const drawCells = (cellList: Cell[]) => {
     // console.log("cellList", cellList)
     cellList.forEach((cell) => {
-      draw(cell)
+      draw(cell, cellList)
     })
     // setCells(cellList)
   }
