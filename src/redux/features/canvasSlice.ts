@@ -6,6 +6,8 @@ import { PayloadAction, createSlice } from "@reduxjs/toolkit"
 interface IState {
   ctx: CanvasRenderingContext2D | null
   cells: Cell[]
+  img: any
+  isReady: boolean
 }
 
 const initialState: IState = {
@@ -22,6 +24,12 @@ export const canvasSlice = createSlice({
     },
     setCells(state, action: PayloadAction<Cell[]>) {
       state.cells = action.payload
+    },
+    setImg(state, action: PayloadAction<any>) {
+      state.img = action.payload
+    },
+    setIsReady(state, action: PayloadAction<boolean>) {
+      state.isReady = action.payload
     },
   },
 })

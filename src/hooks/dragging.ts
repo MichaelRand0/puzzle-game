@@ -3,12 +3,15 @@ import checkIsClose from "../utils/checkIsClose"
 import { useCanvas } from "./canvas"
 import { useDimensions } from "./dimensions"
 import useDraw from "./draw"
+import useGame from "./game"
 
 const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
   const { cells, setCells, selectedCell, setSelectedCell } = useCanvas()
   const { SIZES, cellHeight, cellWidth } = useDimensions()
 
-  const { drawCells } = useDraw(imgRef)
+  const {isGame} = useGame()
+
+  const { draw } = useDraw(imgRef)
 
   const onMouseDown = (e: React.MouseEvent<HTMLCanvasElement, MouseEvent>) => {
     // get cell by click on it
@@ -41,7 +44,7 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
       }
       setSelectedCell({ ...newSelectedCell })
       setCells(copyCells)
-      drawCells(copyCells)
+      draw(null, copyCells)
     }
   }
 
@@ -69,7 +72,7 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
         y: y - selectedCell.offset.y,
       })
       setCells(newCells)
-      drawCells(newCells)
+      draw(null, newCells)
     }
   }
 
@@ -91,7 +94,7 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
             ...selectedCell,
             x: isClose ? selectedCell.initX : x - selectedCell.offset.x,
             y: isClose ? selectedCell.initY : y - selectedCell.offset.y,
-            isCorrect: isClose,
+            isCorrect: isGame && isClose,
           }
         } else {
           return cell
@@ -99,7 +102,7 @@ const useDragging = (imgRef: RefObject<HTMLImageElement>) => {
       })
       setCells(newCells)
       setSelectedCell(null)
-      drawCells(newCells)
+      draw(null, newCells)
     }
   }
 

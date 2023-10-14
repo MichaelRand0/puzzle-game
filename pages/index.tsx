@@ -4,6 +4,7 @@ import { useCanvas } from "@/src/hooks/canvas"
 import { useDimensions } from "@/src/hooks/dimensions"
 import useDragging from "@/src/hooks/dragging"
 import useDraw from "@/src/hooks/draw"
+import useGame from "@/src/hooks/game"
 import { useSettings } from "@/src/hooks/settings"
 import shuffleArray from "@/src/utils/shuffleArray"
 import { useEffect, useRef } from "react"
@@ -14,10 +15,12 @@ export default function Home() {
   const imgRef = useRef<HTMLImageElement>(null)
 
   const { rows, cols } = useSettings()
-  const { initializeCells, cells, setCells } = useCanvas()
+  const { initializeCells, cells, setCells, img } = useCanvas()
+
+  const { isGame, setIsGame } = useGame()
 
   const { onMouseDown, onMouseMove, onMouseUp } = useDragging(imgRef)
-  const { autoDraw, updateDraw, resetDraw, randomDraw, isDrawing } =
+  const { autoDraw, resetDraw, randomDraw, draw, isDrawing } =
     useDraw(imgRef)
 
   useEffect(() => {
@@ -26,22 +29,28 @@ export default function Home() {
     }
   }, [cellWidth])
 
+  const startGame = () => {
+    setIsGame(true)
+    const res = shuffleArray(randomDraw())
+    draw(null, res)
+    setCells(res)
+  }
+
   return (
     <main className={`w-screen h-screen`}>
       <div className="flex flex-col order-2 max-w-[150px] mt-10 fixed left-10 top-[20%]">
         <button
-          onClick={() => autoDraw()}
+          onClick={() => {
+            setIsGame(false)
+            autoDraw()
+          }}
           disabled={rows <= 0 || cols <= 0 || isDrawing}
           className="bg-slate-600 text-white p-2 rounded mb-2 hover:bg-slate-400 hover:text-black transition disabled:hover:bg-slate-600 disabled:hover:text-white disabled:opacity-50"
         >
           Начать сборку
         </button>
         <button
-          onClick={() => {
-            const result = shuffleArray(randomDraw())
-            updateDraw(result)
-            setCells(result)
-          }}
+          onClick={startGame}
           disabled={rows <= 0 || cols <= 0 || isDrawing}
           className="bg-slate-600 text-white p-2 rounded mb-2 hover:bg-slate-400 hover:text-black transition disabled:hover:bg-slate-600 disabled:hover:text-white disabled:opacity-50"
         >
@@ -50,7 +59,8 @@ export default function Home() {
         {cells.length > 0 ? (
           <button
             onClick={() => {
-              updateDraw(resetDraw())
+              setIsGame(false)
+              draw(null, resetDraw())
             }}
             disabled={rows <= 0 || cols <= 0 || isDrawing}
             className="bg-slate-600 text-white p-2 rounded hover:bg-slate-400 hover:text-black transition disabled:hover:bg-slate-600 disabled:hover:text-white disabled:opacity-50"
@@ -63,13 +73,15 @@ export default function Home() {
       </div>
       <Panel imgRef={imgRef} disabled={isDrawing}></Panel>
       <Canvas
-        onMouseDown={(e) => onMouseDown(e)}
+        onMouseDown={(e) => {
+          onMouseDown(e)
+        }}
         onMouseMove={(e) => onMouseMove(e)}
         onMouseUp={(e) => onMouseUp(e)}
         width={SIZES ? SIZES.innerWidth : 0}
         height={SIZES ? SIZES.innerHeight : 0}
       />
-      <img className="hidden" ref={imgRef} src="/example.jpeg" />
+      <img className="hidden" ref={imgRef} src="/example.jpg" />
       {/* {isWin && isGame ? (
         <div className="fixed left-0 top-0 w-full h-full flex items-center justify-center bg-black/70">
           <div className="bg-white p-8 shadow-md rounded flex flex-col">

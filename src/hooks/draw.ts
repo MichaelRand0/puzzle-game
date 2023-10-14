@@ -1,5 +1,5 @@
-import { RefObject, useEffect, useState } from "react"
-import { AnimatedCell, Cell } from "../models/Cell"
+import { RefObject, useEffect } from "react"
+import { Cell } from "../models/Cell"
 import { useCanvas } from "./canvas"
 import { useDimensions } from "./dimensions"
 import { useSettings } from "./settings"
@@ -9,7 +9,7 @@ import sortByCentralCoordinates from "../utils/sortByCentralCoords"
 import getCellCoords from "../utils/getCellCoords"
 
 const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
-  const { cells, setCells, ctx } = useCanvas()
+  const { cells, setCells, ctx, isReady } = useCanvas()
   const { SIZES, cellHeight, cellWidth } = useDimensions()
   const { cols, rows, speed, direction } = useSettings()
   const { isGame, isDrawing, setIsDrawing } = useGame()
@@ -180,21 +180,16 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
     return newCells
   }
 
-  let canAnimate = true
   let coords: Coord[] = []
   let coordIndex = 0
-  let drawOnlyPrevs = false
 
   const animate = (cell: Cell, list: Cell[]) => {
-    // console.log("animate")
     if (coords[coordIndex]) {
       const newCell = {
         ...cell,
         x: coords[coordIndex] ? coords[coordIndex].x : cell.x,
         y: coords[coordIndex] ? coords[coordIndex].y : cell.y,
       }
-      
-      // console.log('list', list)
 
       draw(newCell, list, true)
       coordIndex++
@@ -227,7 +222,11 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
     }
   }
 
-  const draw = (cell: Cell, list: Cell[] = cells, isAutoDraw = false) => {
+  const draw = (
+    cell: Cell | null = null,
+    list: Cell[] = cells,
+    isAutoDraw = false
+  ) => {
     if (ctx && SIZES && imgRef.current) {
       ctx.clearRect(0, 0, SIZES.innerWidth, SIZES.innerHeight)
       ctx.globalAlpha = 0.2
@@ -239,74 +238,43 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
         SIZES.tableHeight
       )
     }
-    // console.log('list', list)
-    list.forEach((item, i) => {
-      const cellFromCells = list.filter(
-        (item2) =>
-          item2.rowIndex === cell.rowIndex && item2.colIndex === cell.colIndex
-      )[0]
-      const indexOf = list.indexOf(cellFromCells)
-      if (item.rowIndex === cell.rowIndex && item.colIndex === cell.colIndex) {
-        drawCanvas(cell, cell.x, cell.y)
-      } else {
-        // console.log('isDrawing', isDrawing)
-        if (i < indexOf && isAutoDraw) {
-          // todo = при dragging отрисовываются только предыдущие клетки, нужно исправить
-          // console.log('item', item)
-          drawCanvas(item, item.initX, item.initY)
+    if (cell) {
+      list.forEach((item, i) => {
+        const cellFromCells = list.filter(
+          (item2) =>
+            item2.rowIndex === cell.rowIndex && item2.colIndex === cell.colIndex
+        )[0]
+        const indexOf = list.indexOf(cellFromCells)
+        if (
+          item.rowIndex === cell.rowIndex &&
+          item.colIndex === cell.colIndex
+        ) {
+          drawCanvas(cell, cell.x, cell.y)
         } else {
-          drawCanvas(item, item.x, item.y)
+          if (i < indexOf && isAutoDraw) {
+            drawCanvas(item, item.initX, item.initY)
+          } else {
+            drawCanvas(item, item.x, item.y)
+          }
         }
-      }
-    })
-  }
-
-  const drawCells = (cellList: Cell[]) => {
-    // console.log("cellList", cellList)
-    cellList.forEach((cell) => {
-      draw(cell, cellList)
-    })
-    // setCells(cellList)
+      })
+    } else {
+      list.forEach((item) => {
+        drawCanvas(item, item.x, item.y)
+      })
+    }
   }
 
   const updateDraw = (newCells: Cell[] = cells) => {
-    // newCells.forEach((item, i) => {
-    // if (i === 45) {
-    // setTimeout(() => {
     if (newCells[0]) {
-      console.log("newCells", newCells)
       coords = getCellCoords(newCells[0])
       animate(newCells[0], newCells)
       setIsDrawing(true)
     }
-    // }, i * speed)
-    // }
-    // })
   }
 
-  // useEffect(() => {
-  //   console.log('CELLSLS', cells)
-  // }, [cells])
-
-  const pushCells = (newCells: Cell[], i: number) => {
-    // const fixedRandomisedCells = newCells.map((randomCell) => {
-    //   if (
-    //     randomCell.colIndex === newCells[i].colIndex &&
-    //     randomCell.rowIndex === newCells[i].rowIndex
-    //   ) {
-    //     return {
-    //       ...randomCell,
-    //       x: randomCell.initX,
-    //       y: randomCell.initY,
-    //     }
-    //   } else {
-    //     return randomCell
-    //   }
-    // })
-    console.log("update")
+  const pushCells = (newCells: Cell[]) => {
     updateDraw(newCells)
-    // setCells(newCells)
-    // newCells = fixedRandomisedCells
     return newCells
   }
 
@@ -322,92 +290,19 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
       switch (direction) {
         case "center":
           const sortedCells = sortByCentralCoordinates([...newCells])
-
-          sortedCells.forEach((sortedCell, i) => {
-            const index = newCells.indexOf(sortedCell)
-            setTimeout(() => {
-              newCells = pushCells(newCells, index)
-            }, i * speed)
-          })
-
-          break
-        case "leftRight":
-          for (let i = 0; i <= newCells.length / 2; i++) {
-            setTimeout(() => {
-              newCells = pushCells(newCells, i)
-            }, (i === 0 ? 1 : speed) * (i + 1))
-          }
-          let count = 0
-          for (let i = newCells.length - 1; i > newCells.length / 2; i--) {
-            let time = (count === 0 ? 1 : speed) * (count + 1)
-            setTimeout(() => {
-              newCells = pushCells(newCells, i)
-            }, time)
-            count++
-          }
+          newCells = pushCells(sortedCells)
           break
 
         case "topLeft":
-          newCells = pushCells(newCells, 0)
+          newCells = pushCells(newCells)
           break
 
         case "random":
-          for (let i = 0; i < newCells.length; i++) {
-            setTimeout(() => {
-              newCells = pushCells(newCells, i)
-            }, (i === 0 ? 1 : speed) * (i + 1))
-          }
+          newCells = pushCells(newCells)
           break
 
         case "bottomRight":
-          for (let i = 0; i < newCells.length; i++) {
-            setTimeout(() => {
-              newCells = pushCells(newCells, i)
-            }, (i === 0 ? 1 : speed) * (i + 1))
-          }
-          break
-
-        case "topBottom":
-          const cellsLength = rows * cols
-          let colIndex = 0
-          for (
-            let i = 0;
-            i <= cellsLength;
-            i = i + cols >= cellsLength ? colIndex : i + cols
-          ) {
-            if (i === cellsLength || i * cols === cellsLength) {
-              break
-            }
-            let time = (rows * colIndex + cells[i].rowIndex) * speed
-            setTimeout(() => {
-              newCells = pushCells(newCells, i)
-            }, time)
-            if (i + cols >= cellsLength) {
-              colIndex = colIndex + 1
-            }
-          }
-
-          let colIndex2 = 1
-
-          for (
-            let i = cellsLength - 1;
-            i >= 0;
-            i = i - cols < 0 ? cellsLength - colIndex2 : i - cols
-          ) {
-            let time = (rows * colIndex2 - cells[i].rowIndex) * speed
-            setTimeout(() => {
-              newCells = pushCells(newCells, i)
-            }, time - speed)
-            if (i - cols < 0) {
-              colIndex2 = colIndex2 + 1
-            }
-            if (i === 0 || i * cols === cellsLength) {
-              break
-            }
-          }
-
-          break
-
+          newCells = pushCells(newCells)
         default:
           break
       }
@@ -442,13 +337,10 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
   }
 
   useEffect(() => {
-    if (isGame) {
-      randomDraw()
-    } else {
-      const newCells = resetDraw()
-      updateDraw(newCells)
+    if (isReady) {
+      draw(null, cells)
     }
-  }, [isGame])
+  }, [isReady])
 
   return {
     resetDraw,
@@ -456,8 +348,9 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
     autoDraw,
     updateDraw,
     isDrawing,
-    drawCells,
+    draw,
     isGame,
+    animate,
   }
 }
 
