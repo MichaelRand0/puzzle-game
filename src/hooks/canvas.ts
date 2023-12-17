@@ -10,9 +10,9 @@ import { Cell, SelectedCell } from "../models/Cell"
 export const useCanvas = () => {
   const dispatch = useDispatch()
   const canvasSelector = useSelector((state: RootState) => state.canvas)
-  const { ctx, cells, img, isReady } = canvasSelector
+  const { ctx, cells, cellsSave, img, isReady } = canvasSelector
   const actions = bindActionCreators({ ...canvasSlice.actions }, dispatch)
-  const { setCtx, setCells, setImg, setIsReady } = actions
+  const { setCtx, setCells, setImg, setIsReady, setCellsSave } = actions
   const { rows, cols } = useSettings()
   const [selectedCell, setSelectedCell] = useState<SelectedCell | null>(null)
   const { SIZES, cellWidth, cellHeight } = useDimensions()
@@ -65,6 +65,8 @@ export const useCanvas = () => {
     img,
     isReady,
     setImg,
+    setCellsSave,
+    cellsSave,
     setIsReady,
   }
 }

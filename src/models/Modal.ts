@@ -1,0 +1,1 @@
+export type ModalType = 'intro' | 'final' | 'photo' | null

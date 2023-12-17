@@ -9,8 +9,8 @@ interface IState {
 }
 
 const initialState: IState = {
-  rows: 5,
-  cols: 10,
+  rows: 3,
+  cols: 6,
   speed: 50,
   direction: "topLeft",
 }

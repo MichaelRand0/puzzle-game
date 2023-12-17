@@ -4,12 +4,14 @@ interface IState {
   isGame: boolean
   isDrawing: boolean
   isWin: boolean
+  photoIndex: number
 }
 
 const initialState: IState = {
   isGame: false,
   isDrawing: false,
-  isWin: false
+  isWin: false,
+  photoIndex: 0
 }
 
 export const gameSlice = createSlice({
@@ -24,6 +26,9 @@ export const gameSlice = createSlice({
     },
     setIsWin(state, action: PayloadAction<boolean>) {
       state.isWin = action.payload
+    },
+    setPhotoIndex(state, action: PayloadAction<number>) {
+      state.photoIndex = action.payload
     },
   },
 })

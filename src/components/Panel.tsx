@@ -4,6 +4,8 @@ import convertMsToTime from "../utils/msToTime"
 import { Direction } from "../models/Settings"
 import useDraw from "../hooks/draw"
 import { useCanvas } from "../hooks/canvas"
+import shuffleArray from "../utils/shuffleArray"
+import useGame from "../hooks/game"
 
 interface Props extends React.ComponentProps<"div"> {
   disabled?: boolean
@@ -15,9 +17,11 @@ const Panel = (props: Props) => {
   const { setCols, setRows, direction, setDirection, cols, rows, speed } =
     useSettings()
 
-    const {img, setImg} = useCanvas()
+    const {isGame} = useGame()
 
-  const { draw, resetDraw } = useDraw(imgRef)
+  const { img, setImg, setCells } = useCanvas()
+
+  const { draw, resetDraw, randomDraw } = useDraw(imgRef)
 
   const [totalTime, setTotalTime] = useState("")
 
@@ -72,9 +76,12 @@ const Panel = (props: Props) => {
         if (event.target && imgRef.current) {
           imgRef.current.src = event.target.result?.toString() ?? ""
           setTimeout(() => {
-            draw(null, resetDraw())
+            // draw(null, resetDraw())
+            const res = shuffleArray(randomDraw())
+            draw(null, res)
+            setCells(res)
           }, 1)
-          setImg(imgRef.current.name)
+          setImg(imgRef.current["src"])
         }
       }
 
@@ -86,10 +93,10 @@ const Panel = (props: Props) => {
     <header className="fixed w-full left-10 top-5 flex">
       <div className="mr-10 flex flex-col">
         <div>
-          <div className="text-black">
+          {/* <div className="text-black">
             Время авто. сборки:{" "}
             <span className="text-red-600 font-bold">{totalTime}</span>
-          </div>
+          </div> */}
 
           <div className="text-black">
             Количество паззлов:{" "}
@@ -98,11 +105,11 @@ const Panel = (props: Props) => {
         </div>
         {children}
       </div>
-      <div className="flex">
+      <div className="flex items-center">
         <div className="flex flex-col mr-10">
           <span className="mb-1">Количество строк</span>
           <input
-            disabled={disabled}
+            disabled={disabled || isGame}
             max={100}
             onChange={(val) =>
               onRowsChange(validateNumber(Number(val.currentTarget.value), 100))
@@ -113,7 +120,7 @@ const Panel = (props: Props) => {
             placeholder={rows.toString()}
           />
         </div>
-        <div className="flex flex-col mr-10">
+        {/* <div className="flex flex-col mr-10">
           <span className="mb-1">Количество колоннок</span>
           <input
             disabled={disabled}
@@ -125,7 +132,7 @@ const Panel = (props: Props) => {
             className="w-32 text-lg p-2 text-lime-600 font-medium"
             placeholder={cols.toString()}
           />
-        </div>
+        </div> */}
         {/* <div className="flex flex-col mr-10">
           <span className="mb-1">Скорость сборки одного паззла(в мс)</span>
           <input
@@ -137,31 +144,22 @@ const Panel = (props: Props) => {
             placeholder={speed.toString()}
           />
         </div> */}
-        <div className="flex flex-col">
-          <span className="mb-1">Выбрать изображение</span>
+        {isGame ? '' : <div className="flex flex-col mr-10">
+          <label
+            className="h-1/2 text-center cursor-pointer flex items-center bg-slate-600 text-white p-2 rounded mr-2 hover:bg-slate-400 hover:text-black transition disabled:hover:bg-slate-600 disabled:hover:text-white disabled:opacity
+      -50"
+            htmlFor="img"
+          >
+            Выбрать картинку
+          </label>
           <input
-            disabled={disabled}
+            disabled={disabled || isGame}
+            id="img"
             onChange={(val) => onFileSelect(val)}
             type="file"
-            className=" text-transparent p-2 w-64 font-medium placeholder:hidden"
+            className="hidden text-transparent p-2 w-64 font-medium placeholder:hidden"
           />
-        </div>
-        <div className="flex flex-col mr-10">
-          <span className="mb-1">Направление авто. сборки</span>
-          <select
-          disabled={disabled}
-            onChange={(e: any) => setDirectionValue(e.target.value)}
-            value={directionValue}
-            className="text-black"
-          >
-            <option value="topLeft">С верхнего левого края</option>
-            {/* <option value="topBottom">Сверху и снизу</option> */}
-            <option value="center">С центра</option>
-            <option value="random">Случайно</option>
-            {/* <option value="leftRight">Слева и справа</option> */}
-            <option value="bottomRight">С нижнего правого края</option>
-          </select>
-        </div>
+        </div>}
       </div>
     </header>
   )

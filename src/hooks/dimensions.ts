@@ -10,20 +10,20 @@ export const useDimensions = () => {
 
   useEffect(() => {
     if (sizes) {
-      setCellWidth((sizes.innerWidth * 0.7) / cols)
+      setCellWidth((sizes.innerHeight * 0.7) / cols)
       setCellHeight((sizes.innerHeight * 0.7) / rows)
     }
   }, [sizes, rows, cols])
 
   useEffect(() => {
-    if (window) {
+    if (window && !sizes) {
       // initialize sizes
       const newSizes: Sizes = {
         innerWidth: window.innerWidth,
         innerHeight: window.innerHeight,
         tableWidth: window.innerWidth * 0.7,
         tableHeight: window.innerHeight * 0.7,
-        tableX: window.innerWidth * 0.15,
+        tableX: window.innerWidth * 0.33,
         tableY: window.innerHeight * 0.2,
         windowWidth: window.outerWidth,
         windowHeight: window.outerHeight

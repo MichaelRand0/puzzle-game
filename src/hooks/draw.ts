@@ -9,7 +9,7 @@ import sortByCentralCoordinates from "../utils/sortByCentralCoords"
 import getCellCoords from "../utils/getCellCoords"
 
 const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
-  const { cells, setCells, ctx, isReady } = useCanvas()
+  const { cells, setCells, ctx, isReady, img } = useCanvas()
   const { SIZES, cellHeight, cellWidth } = useDimensions()
   const { cols, rows, speed, direction } = useSettings()
   const { isGame, isDrawing, setIsDrawing } = useGame()
@@ -136,21 +136,22 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
 
       ctx.save()
       ctx.clip()
+      const imgWidth = imgRef.current.width
+      const imgHeight = imgRef.current.height
+      const imgSumSize = imgWidth + imgHeight
       const scaledTabHeight =
-        (Math.min(imgRef.current.width / cols, imgRef.current.height / rows) *
-          tabHeight) /
-        sz
+        (Math.min(imgWidth / cols, imgHeight / rows) * tabHeight) / sz
 
       ctx.drawImage(
         imgRef.current,
-        (cell.colIndex * imgRef.current.width) / cols - scaledTabHeight,
-        (cell.rowIndex * imgRef.current.height) / rows - scaledTabHeight,
-        imgRef.current.width / cols + scaledTabHeight * 2,
-        imgRef.current.height / rows + scaledTabHeight * 2,
-        x - tabHeight,
-        y - tabHeight,
-        cellWidth + tabHeight * 2,
-        cellHeight + tabHeight * 2
+        ((cell.colIndex * imgWidth) / cols - scaledTabHeight), // +
+        ((cell.rowIndex * imgHeight) / rows - scaledTabHeight), // +
+        (imgWidth / cols + scaledTabHeight * 2),
+        (imgHeight / rows + scaledTabHeight * 2),
+        (x - tabHeight),
+        (y - tabHeight),
+        (cellWidth + tabHeight * 2),
+        (cellHeight + tabHeight * 2)
       )
 
       ctx.restore()
@@ -227,41 +228,47 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
     list: Cell[] = cells,
     isAutoDraw = false
   ) => {
-    if (ctx && SIZES && imgRef.current) {
-      ctx.clearRect(0, 0, SIZES.innerWidth, SIZES.innerHeight)
-      ctx.globalAlpha = 0.2
-      ctx.drawImage(
-        imgRef.current,
-        SIZES.tableX,
-        SIZES.tableY,
-        SIZES.tableWidth,
-        SIZES.tableHeight
-      )
-    }
-    if (cell) {
-      list.forEach((item, i) => {
-        const cellFromCells = list.filter(
-          (item2) =>
-            item2.rowIndex === cell.rowIndex && item2.colIndex === cell.colIndex
-        )[0]
-        const indexOf = list.indexOf(cellFromCells)
-        if (
-          item.rowIndex === cell.rowIndex &&
-          item.colIndex === cell.colIndex
-        ) {
-          drawCanvas(cell, cell.x, cell.y)
-        } else {
-          if (i < indexOf && isAutoDraw) {
-            drawCanvas(item, item.initX, item.initY)
+    // console.log('imgRef.current',imgRef.current)
+    // console.log('SIZES',SIZES)
+    const image = new Image()
+    image.src = img
+    image.onload = () => {
+      if (ctx && SIZES && imgRef.current) {
+        ctx.clearRect(0, 0, SIZES.innerWidth, SIZES.innerHeight)
+        ctx.globalAlpha = 0.2
+        ctx.drawImage(
+          imgRef.current,
+          SIZES.tableX,
+          SIZES.tableY,
+          SIZES.tableHeight,
+          SIZES.tableHeight
+        )
+      }
+      if (cell) {
+        list.forEach((item, i) => {
+          const cellFromCells = list.filter(
+            (item2) =>
+              item2.rowIndex === cell.rowIndex && item2.colIndex === cell.colIndex
+          )[0]
+          const indexOf = list.indexOf(cellFromCells)
+          if (
+            item.rowIndex === cell.rowIndex &&
+            item.colIndex === cell.colIndex
+          ) {
+            drawCanvas(cell, cell.x, cell.y)
           } else {
-            drawCanvas(item, item.x, item.y)
+            if (i < indexOf && isAutoDraw) {
+              drawCanvas(item, item.initX, item.initY)
+            } else {
+              drawCanvas(item, item.x, item.y)
+            }
           }
-        }
-      })
-    } else {
-      list.forEach((item) => {
-        drawCanvas(item, item.x, item.y)
-      })
+        })
+      } else {
+        list.forEach((item) => {
+          drawCanvas(item, item.x, item.y)
+        })
+      }
     }
   }
 
@@ -318,10 +325,10 @@ const useDraw = (imgRef: RefObject<HTMLImageElement>) => {
       const newCells = resettedCells.map((cell) => {
         const randomX =
           Math.random() * (SIZES.tableWidth / 4 - cellWidth) +
-          SIZES.tableX * 5.4
+          SIZES.tableX * 2.2
         const randomY =
           Math.random() * (SIZES.tableHeight / 2 - cellHeight) +
-          SIZES.tableY * 2
+          SIZES.tableY * 1.8
 
         return {
           ...cell,
